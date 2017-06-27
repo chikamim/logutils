@@ -36,12 +36,13 @@ func (f *LevelFilter) Check(line []byte) bool {
 	f.once.Do(f.init)
 
 	// Check for a log level
+	prefix := "level:"
 	var level LogLevel
-	x := bytes.IndexByte(line, '[')
+	x := bytes.Index(line, []byte(prefix))
 	if x >= 0 {
-		y := bytes.IndexByte(line[x:], ']')
+		y := bytes.IndexByte(line[x:], '\t')
 		if y >= 0 {
-			level = LogLevel(line[x+1 : x+y])
+			level = LogLevel(line[x+len(prefix) : x+y])
 		}
 	}
 
