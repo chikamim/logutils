@@ -8,6 +8,10 @@ with new logging packages.
 
 Presumably your application already uses the default `log` package. To switch, you'll want your code to look like the following:
 
+## Changed in this fork
+
+- [Labeled Tab-separated Values](http://ltsv.org) log level
+
 ```go
 package main
 
@@ -15,7 +19,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/hashicorp/logutils"
+	"github.com/chikamim/logutils"
 )
 
 func main() {
@@ -26,9 +30,9 @@ func main() {
 	}
 	log.SetOutput(filter)
 
-	log.Print("[DEBUG] Debugging") // this will not print
-	log.Print("[WARN] Warning") // this will
-	log.Print("[ERROR] Erring") // and so will this
+	log.Print("level:DEBUG\tmessage:Debugging") // this will not print
+	log.Print("level:WARN\tmessage:Warning") // this will
+	log.Print("level:ERROR\tmessage: Erring") // and so will this
 	log.Print("Message I haven't updated") // and so will this
 }
 ```
