@@ -61,15 +61,21 @@ func (f *LevelFilter) Write(p []byte) (n int, err error) {
 	if !f.Check(p) {
 		return len(p), nil
 	}
+	p = ToTLSVDate(p)
 
-	if p[4] == byte('/') && p[16] == byte(':') {
-		t := p[0:19]
-		p = p[20:]
+	return f.Writer.Write(ToJSON(p))
+}
+
+func ToTLSVDate(b []byte) []byte {
+	if b[4] == byte('/') && b[16] == byte(':') {
+		t := b[0:19]
+		p := b[20:]
 		p = append([]byte("\t"), p...)
 		p = append(t, p...)
 		p = append([]byte("time:"), p...)
+		return p
 	}
-	return f.Writer.Write(ToJSON(p))
+	return b
 }
 
 func ToInfluxLine(b []byte) []byte {
@@ -78,11 +84,19 @@ func ToInfluxLine(b []byte) []byte {
 }
 
 func ToJSON(b []byte) []byte {
+	j := bytes.Buffer{}
+	j.WriteString("{")
 	s := string(b[0 : len(b)-1])
-	s = "{\"" + s + "\"}" + "\n"
-	s = strings.Replace(s, "\t", "\", \"", -1)
-	s = strings.Replace(s, ":", "\":\"", -1)
-	return []byte(s)
+	pairs := strings.Split(s, "\t")
+	for i, pair := range pairs {
+		kv := strings.SplitN(pair, ":", 2)
+		j.WriteString("\"" + kv[0] + "\":\"" + kv[1] + "\"")
+		if i < len(pairs)-1 {
+			j.WriteString(", ")
+		}
+	}
+	j.WriteString("}\n")
+	return j.Bytes()
 }
 
 // SetMinLevel is used to update the minimum log level
