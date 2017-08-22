@@ -1,10 +1,9 @@
-// Package logutils augments the standard log package with levels.
-package logutils
+package logltsv
 
 import (
 	"bytes"
 	"io"
-	"strings"
+	"os"
 	"sync"
 )
 
@@ -15,7 +14,7 @@ type LogLevel string
 //
 // Once the filter is in use somewhere, it is not safe to modify
 // the structure.
-type LevelFilter struct {
+type Output struct {
 	// Levels is the list of log levels, in increasing order of
 	// severity. Example might be: {"DEBUG", "WARN", "ERROR"}.
 	Levels []LogLevel
@@ -27,13 +26,25 @@ type LevelFilter struct {
 	// will be set.
 	Writer io.Writer
 
+	Prefix     string
+	JSONOutput bool
+
 	badLevels map[LogLevel]struct{}
 	once      sync.Once
 }
 
+func NewOutput() Output {
+	return Output{
+		Levels:     []LogLevel{"DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"},
+		MinLevel:   LogLevel("INFO"),
+		Writer:     os.Stderr,
+		JSONOutput: false,
+	}
+}
+
 // Check will check a given line if it would be included in the level
 // filter.
-func (f *LevelFilter) Check(line []byte) bool {
+func (f *Output) Check(line []byte) bool {
 	f.once.Do(f.init)
 
 	// Check for a log level
@@ -51,7 +62,7 @@ func (f *LevelFilter) Check(line []byte) bool {
 	return !ok
 }
 
-func (f *LevelFilter) Write(p []byte) (n int, err error) {
+func (f *Output) Write(p []byte) (n int, err error) {
 	// Note in general that io.Writer can receive any byte sequence
 	// to write, but the "log" package always guarantees that we only
 	// get a single line. We use that as a slight optimization within
@@ -61,51 +72,21 @@ func (f *LevelFilter) Write(p []byte) (n int, err error) {
 	if !f.Check(p) {
 		return len(p), nil
 	}
-	p = ToTLSVDate(p)
+	p = parseField(p)
 
-	return f.Writer.Write(ToJSON(p))
-}
-
-func ToTLSVDate(b []byte) []byte {
-	if b[4] == byte('/') && b[16] == byte(':') {
-		t := b[0:19]
-		p := b[20:]
-		p = append([]byte("\t"), p...)
-		p = append(t, p...)
-		p = append([]byte("time:"), p...)
-		return p
+	if f.JSONOutput {
+		p = ToJSON(p)
 	}
-	return b
-}
-
-func ToInfluxLine(b []byte) []byte {
-	// ltsv
-	return b
-}
-
-func ToJSON(b []byte) []byte {
-	j := bytes.Buffer{}
-	j.WriteString("{")
-	s := string(b[0 : len(b)-1])
-	pairs := strings.Split(s, "\t")
-	for i, pair := range pairs {
-		kv := strings.SplitN(pair, ":", 2)
-		j.WriteString("\"" + kv[0] + "\":\"" + kv[1] + "\"")
-		if i < len(pairs)-1 {
-			j.WriteString(", ")
-		}
-	}
-	j.WriteString("}\n")
-	return j.Bytes()
+	return f.Writer.Write(p)
 }
 
 // SetMinLevel is used to update the minimum log level
-func (f *LevelFilter) SetMinLevel(min LogLevel) {
+func (f *Output) SetMinLevel(min LogLevel) {
 	f.MinLevel = min
 	f.init()
 }
 
-func (f *LevelFilter) init() {
+func (f *Output) init() {
 	badLevels := make(map[LogLevel]struct{})
 	for _, level := range f.Levels {
 		if level == f.MinLevel {

@@ -1,4 +1,4 @@
-package logutils
+package logltsv
 
 import (
 	"bytes"
@@ -8,12 +8,12 @@ import (
 )
 
 func TestLevelFilter_impl(t *testing.T) {
-	var _ io.Writer = new(LevelFilter)
+	var _ io.Writer = new(Output)
 }
 
 func TestLevelFilter(t *testing.T) {
 	buf := new(bytes.Buffer)
-	filter := &LevelFilter{
+	filter := &Output{
 		Levels:   []LogLevel{"DEBUG", "WARN", "ERROR"},
 		MinLevel: "WARN",
 		Writer:   buf,
@@ -34,7 +34,7 @@ func TestLevelFilter(t *testing.T) {
 }
 
 func TestLevelFilterCheck(t *testing.T) {
-	filter := &LevelFilter{
+	filter := &Output{
 		Levels:   []LogLevel{"DEBUG", "WARN", "ERROR"},
 		MinLevel: "WARN",
 		Writer:   nil,
@@ -59,7 +59,7 @@ func TestLevelFilterCheck(t *testing.T) {
 }
 
 func TestLevelFilter_SetMinLevel(t *testing.T) {
-	filter := &LevelFilter{
+	filter := &Output{
 		Levels:   []LogLevel{"DEBUG", "WARN", "ERROR"},
 		MinLevel: "ERROR",
 		Writer:   nil,
