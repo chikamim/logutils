@@ -8,12 +8,12 @@ import (
 func ToJSON(b []byte) []byte {
 	j := bytes.Buffer{}
 	j.WriteString("{")
-	s := string(b[0 : len(b)-1])
-	pairs := strings.Split(string(s), "\t")
+	s := strings.TrimRight(string(b), "\n")
+	pairs := strings.Split(s, "\t")
 	for i, pair := range pairs {
 		kv := strings.SplitN(pair, ":", 2)
 		if len(kv) < 2 {
-			//TODO: parse error, set default key ("message")?
+			//TODO: parse error. better set default key "payload"?
 			return b
 		}
 		j.WriteString("\"" + kv[0] + "\":\"" + kv[1] + "\"")
@@ -21,6 +21,6 @@ func ToJSON(b []byte) []byte {
 			j.WriteString(", ")
 		}
 	}
-	j.WriteString("}\n")
+	j.WriteString("}\n") // TODO: check log.Print()
 	return j.Bytes()
 }

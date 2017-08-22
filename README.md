@@ -1,16 +1,19 @@
-# logutils
+# logltsv
 
-logutils is a Go package that augments the standard library "log" package
+logltsv is a Go package that augments the standard library "log" package
 to make logging a bit more modern, without fragmenting the Go ecosystem
-with new logging packages.
+with new logging packages. Based on hashicorp's [logutils](https://github.com/hashicorp/logutils).
+
+## Key features
+* Good human readablity, writability and computer parsablility.
+* Using standard package won't break your log code.
+* Set log level and apply level filter.
+* Structured log using [LTSV](http://ltsv.org) with plain text.
+* Can output to single line JSON.
 
 ## The simplest thing that could possibly work
 
 Presumably your application already uses the default `log` package. To switch, you'll want your code to look like the following:
-
-## Changed in this fork
-
-- [Labeled Tab-separated Values](http://ltsv.org) log level
 
 ```go
 package main
@@ -23,19 +26,12 @@ import (
 )
 
 func main() {
-	output := &logltsv.Output{
-		Levels:     []logltsv.LogLevel{"DEBUG", "INFO", "WARN", "ERROR"},
-		MinLevel:   logltsv.LogLevel("WARN"),
-		Writer:     os.Stderr,
-		JSONOutput: true,
-	}
-
-	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile | log.LUTC)
-	log.SetOutput(output)
+	log.SetOutput(logltsv.NewJSONOutput())
 	log.Print("level:DEBUG\tmessage:Debugging")
+	// this will not print
 	log.Print("level:WARN\tmessage:Warning")
+	// Outout: {"time":"2009/01/23 01:23:23", "level":"WARN", "message":"Warning"}
 	log.Print("level:ERROR\tmessage:Erring")
+	// Outout: {"time":"2009/01/23 01:23:23", "level":"ERROR", "message":"Erring"}
 }
 ```
-
-This logs to standard error exactly like go's standard logger. Any log messages you haven't converted to have a level will continue to print as before.
