@@ -30,6 +30,7 @@ func ParseTime(b []byte) (parsed, rest []byte) {
 		buf.WriteString("\t")
 		return buf.Bytes(), rest
 	}
+	// TODO: short time format?
 	return parsed, b
 }
 

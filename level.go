@@ -35,7 +35,7 @@ type Output struct {
 
 func NewOutput() *Output {
 	return &Output{
-		Levels:     []LogLevel{"DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"},
+		Levels:     []LogLevel{"DEBUG", "INFO", "WARN", "ERROR", "FATAL"},
 		MinLevel:   LogLevel("INFO"),
 		Writer:     os.Stderr,
 		JSONOutput: false,
@@ -44,7 +44,7 @@ func NewOutput() *Output {
 
 func NewJSONOutput() *Output {
 	return &Output{
-		Levels:     []LogLevel{"DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"},
+		Levels:     []LogLevel{"DEBUG", "INFO", "WARN", "ERROR", "FATAL"},
 		MinLevel:   LogLevel("INFO"),
 		Writer:     os.Stderr,
 		JSONOutput: true,

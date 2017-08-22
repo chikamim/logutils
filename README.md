@@ -19,21 +19,22 @@ import (
 	"log"
 	"os"
 
-	"github.com/chikamim/logutils"
+	"github.com/chikamim/logltsv"
 )
 
 func main() {
-	filter := &logutils.LevelFilter{
-		Levels: []logutils.LogLevel{"DEBUG", "WARN", "ERROR"},
-		MinLevel: logutils.LogLevel("WARN"),
-		Writer: os.Stderr,
+	output := &logltsv.Output{
+		Levels:     []logltsv.LogLevel{"DEBUG", "INFO", "WARN", "ERROR"},
+		MinLevel:   logltsv.LogLevel("WARN"),
+		Writer:     os.Stderr,
+		JSONOutput: true,
 	}
-	log.SetOutput(filter)
 
-	log.Print("level:DEBUG\tmessage:Debugging") // this will not print
-	log.Print("level:WARN\tmessage:Warning") // this will
-	log.Print("level:ERROR\tmessage: Erring") // and so will this
-	log.Print("Message I haven't updated") // and so will this
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile | log.LUTC)
+	log.SetOutput(output)
+	log.Print("level:DEBUG\tmessage:Debugging")
+	log.Print("level:WARN\tmessage:Warning")
+	log.Print("level:ERROR\tmessage:Erring")
 }
 ```
 
