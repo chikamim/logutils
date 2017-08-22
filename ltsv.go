@@ -2,18 +2,17 @@ package logltsv
 
 import "bytes"
 
-func parseField(b []byte) []byte {
+func ParseField(b []byte) []byte {
 	buf := bytes.Buffer{}
-	p, r := parseTime(b)
+	p, r := ParseTime(b)
 	buf.Write(p)
-	p, r = parseFilename(r)
+	p, r = ParseFilename(r)
 	buf.Write(p)
-	buf.WriteString("\t")
 	buf.Write(r)
 	return buf.Bytes()
 }
 
-func parseTime(b []byte) (parsed, rest []byte) {
+func ParseTime(b []byte) (parsed, rest []byte) {
 	if b[4] == byte('/') && b[16] == byte(':') && b[19] == byte('.') {
 		time := b[0:26]
 		rest := b[27:]
@@ -34,7 +33,7 @@ func parseTime(b []byte) (parsed, rest []byte) {
 	return parsed, b
 }
 
-func parseFilename(b []byte) (parsed, rest []byte) {
+func ParseFilename(b []byte) (parsed, rest []byte) {
 	e := bytes.Index(b, []byte(".go:"))
 	l := bytes.Index(b, []byte(": "))
 	if e > 0 && l > 0 {
@@ -46,6 +45,7 @@ func parseFilename(b []byte) (parsed, rest []byte) {
 		buf.Write(file)
 		buf.WriteString("\tline:")
 		buf.Write(line)
+		buf.WriteString("\t")
 		return buf.Bytes(), rest
 	}
 	return parsed, b

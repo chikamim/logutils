@@ -93,3 +93,38 @@ func TestLevelFilter_SetMinLevel(t *testing.T) {
 		}
 	}
 }
+
+func TestNewOutput(t *testing.T) {
+	buf := new(bytes.Buffer)
+	output := NewOutput()
+	output.Writer = buf
+	logger := log.New(output, "", 0)
+	logger.Print("level:WARN\tfoo")
+	logger.Println("level:ERROR\tbar")
+	logger.Println("level:DEBUG\tbaz")
+	logger.Println("level:INFO\tbuzz")
+
+	result := buf.String()
+	expected := "level:WARN\tfoo\nlevel:ERROR\tbar\nlevel:INFO\tbuzz\n"
+
+	if result != expected {
+		t.Fatalf("bad: %#v", result)
+	}
+}
+
+func TestNewJSONOutput(t *testing.T) {
+	buf := new(bytes.Buffer)
+	output := NewJSONOutput()
+	output.Writer = buf
+	logger := log.New(output, "", 0)
+	logger.Print("level:WARN\tmessage:foo")
+	logger.Println("level:ERROR\tmessage:bar")
+	logger.Println("level:DEBUG\tmessage:baz")
+	logger.Println("level:INFO\tmessage:buzz")
+
+	result := buf.String()
+	expected := "{\"level\":\"WARN\", \"message\":\"foo\"}\n{\"level\":\"ERROR\", \"message\":\"bar\"}\n{\"level\":\"INFO\", \"message\":\"buzz\"}\n"
+	if result != expected {
+		t.Fatalf("bad: %#v", result)
+	}
+}

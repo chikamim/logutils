@@ -33,12 +33,21 @@ type Output struct {
 	once      sync.Once
 }
 
-func NewOutput() Output {
-	return Output{
+func NewOutput() *Output {
+	return &Output{
 		Levels:     []LogLevel{"DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"},
 		MinLevel:   LogLevel("INFO"),
 		Writer:     os.Stderr,
 		JSONOutput: false,
+	}
+}
+
+func NewJSONOutput() *Output {
+	return &Output{
+		Levels:     []LogLevel{"DEBUG", "INFO", "WARN", "ERROR", "CRITICAL"},
+		MinLevel:   LogLevel("INFO"),
+		Writer:     os.Stderr,
+		JSONOutput: true,
 	}
 }
 
@@ -72,7 +81,7 @@ func (f *Output) Write(p []byte) (n int, err error) {
 	if !f.Check(p) {
 		return len(p), nil
 	}
-	p = parseField(p)
+	p = ParseField(p)
 
 	if f.JSONOutput {
 		p = ToJSON(p)
