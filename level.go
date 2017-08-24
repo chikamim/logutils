@@ -26,7 +26,6 @@ type Output struct {
 	// will be set.
 	Writer io.Writer
 
-	Prefix     string
 	JSONOutput bool
 
 	badLevels map[LogLevel]struct{}
