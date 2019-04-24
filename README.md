@@ -1,15 +1,22 @@
-# logltsv
+# logutils
 
 logltsv is a Go package that augments the standard library "log" package
 to make logging a bit more modern, without fragmenting the Go ecosystem
 with new logging packages. Based on hashicorp's [logutils](https://github.com/hashicorp/logutils).
 
 ## Key features
-* Good human readablity, writability and computer parsablility.
-* Using standard package won't break your log code.
-* Set log level and apply level filter.
-* Structured log using [LTSV](http://ltsv.org) with plain text.
-* Can output to single line JSON.
+
+- Good human readability, writability and computer parsability.
+- Using standard package won't break your log code.
+- Set log level and apply level filter.
+- Structured log using [LTSV](http://ltsv.org) with plain text.
+- Output [zap](https://github.com/uber-go/zap) compatible development and production format.
+
+## Log format
+
+```
+[INFO] message\tkey1:value1\tkey2:value2
+```
 
 ## The simplest thing that could possibly work
 
@@ -22,16 +29,12 @@ import (
 	"log"
 	"os"
 
-	"github.com/chikamim/logltsv"
+	"github.com/chikamim/logutils"
 )
 
 func main() {
-	log.SetOutput(logltsv.NewJSONOutput())
-	log.Print("level:DEBUG\tmessage:Debugging")
-	// this will not print
-	log.Print("level:WARN\tmessage:Warning")
-	// Outout: {"time":"2009/01/23 01:23:23", "level":"WARN", "message":"Warning"}
-	log.Print("level:ERROR\tmessage:Erring")
-	// Outout: {"time":"2009/01/23 01:23:23", "level":"ERROR", "message":"Erring"}
+	log.SetOutput(logutils.NewProduction())
+	log.Print("[INFO] purchase items\tname:apple\tcount:3")
+	// Output: {"level":"info","ts":1556071424.0936801,"caller":"main.go:6","msg":"purchase items","name":"apple","count":3}
 }
 ```

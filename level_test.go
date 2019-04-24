@@ -1,4 +1,4 @@
-package logltsv
+package logutils
 
 import (
 	"bytes"
@@ -8,33 +8,32 @@ import (
 )
 
 func TestLevelFilter_impl(t *testing.T) {
-	var _ io.Writer = new(Output)
+	var _ io.Writer = new(LevelFilter)
 }
 
 func TestLevelFilter(t *testing.T) {
 	buf := new(bytes.Buffer)
-	filter := &Output{
+	filter := &LevelFilter{
 		Levels:   []LogLevel{"DEBUG", "WARN", "ERROR"},
 		MinLevel: "WARN",
 		Writer:   buf,
 	}
 
 	logger := log.New(filter, "", 0)
-	logger.Print("level:WARN\tfoo")
-	logger.Println("level:ERROR\tbar")
-	logger.Println("level:DEBUG\tbaz")
-	logger.Println("level:WARN\tbuzz")
+	logger.Print("[WARN] foo")
+	logger.Println("[ERROR] bar")
+	logger.Println("[DEBUG] baz")
+	logger.Println("[WARN] buzz")
 
 	result := buf.String()
-	expected := "level:WARN\tfoo\nlevel:ERROR\tbar\nlevel:WARN\tbuzz\n"
-
+	expected := "[WARN] foo\n[ERROR] bar\n[WARN] buzz\n"
 	if result != expected {
 		t.Fatalf("bad: %#v", result)
 	}
 }
 
 func TestLevelFilterCheck(t *testing.T) {
-	filter := &Output{
+	filter := &LevelFilter{
 		Levels:   []LogLevel{"DEBUG", "WARN", "ERROR"},
 		MinLevel: "WARN",
 		Writer:   nil,
@@ -44,10 +43,10 @@ func TestLevelFilterCheck(t *testing.T) {
 		line  string
 		check bool
 	}{
-		{"level:WARN\tfoo\n", true},
-		{"level:ERROR\tbar\n", true},
-		{"level:DEBUG\tbaz\n", false},
-		{"level:WARN\tbuzz\n", true},
+		{"[WARN] foo\n", true},
+		{"[ERROR] bar\n", true},
+		{"[DEBUG] baz\n", false},
+		{"[WARN] buzz\n", true},
 	}
 
 	for _, testCase := range testCases {
@@ -59,7 +58,7 @@ func TestLevelFilterCheck(t *testing.T) {
 }
 
 func TestLevelFilter_SetMinLevel(t *testing.T) {
-	filter := &Output{
+	filter := &LevelFilter{
 		Levels:   []LogLevel{"DEBUG", "WARN", "ERROR"},
 		MinLevel: "ERROR",
 		Writer:   nil,
@@ -70,10 +69,10 @@ func TestLevelFilter_SetMinLevel(t *testing.T) {
 		checkBefore bool
 		checkAfter  bool
 	}{
-		{"level:WARN\tfoo\n", false, true},
-		{"level:ERROR\tbar\n", true, true},
-		{"level:DEBUG\t baz\n", false, false},
-		{"level:WARN\tbuzz\n", false, true},
+		{"[WARN] foo\n", false, true},
+		{"[ERROR] bar\n", true, true},
+		{"[DEBUG] baz\n", false, false},
+		{"[WARN] buzz\n", false, true},
 	}
 
 	for _, testCase := range testCases {
@@ -91,40 +90,5 @@ func TestLevelFilter_SetMinLevel(t *testing.T) {
 		if result != testCase.checkAfter {
 			t.Errorf("Fail: %s", testCase.line)
 		}
-	}
-}
-
-func TestNewOutput(t *testing.T) {
-	buf := new(bytes.Buffer)
-	output := NewOutput()
-	output.Writer = buf
-	logger := log.New(output, "", 0)
-	logger.Print("level:WARN\tfoo")
-	logger.Println("level:ERROR\tbar")
-	logger.Println("level:DEBUG\tbaz")
-	logger.Println("level:INFO\tbuzz")
-
-	result := buf.String()
-	expected := "level:WARN\tfoo\nlevel:ERROR\tbar\nlevel:INFO\tbuzz\n"
-
-	if result != expected {
-		t.Fatalf("bad: %#v", result)
-	}
-}
-
-func TestNewJSONOutput(t *testing.T) {
-	buf := new(bytes.Buffer)
-	output := NewJSONOutput()
-	output.Writer = buf
-	logger := log.New(output, "", 0)
-	logger.Print("level:WARN\tmessage:foo")
-	logger.Println("level:ERROR\tmessage:bar")
-	logger.Println("level:DEBUG\tmessage:baz")
-	logger.Println("level:INFO\tmessage:buzz")
-
-	result := buf.String()
-	expected := "{\"level\":\"WARN\", \"message\":\"foo\"}\n{\"level\":\"ERROR\", \"message\":\"bar\"}\n{\"level\":\"INFO\", \"message\":\"buzz\"}\n"
-	if result != expected {
-		t.Fatalf("bad: %#v", result)
 	}
 }

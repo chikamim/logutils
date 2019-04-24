@@ -1,4 +1,4 @@
-package logltsv
+package logutils
 
 import (
 	"io/ioutil"
@@ -24,7 +24,7 @@ func BenchmarkDiscard(b *testing.B) {
 }
 
 func BenchmarkLevelFilter(b *testing.B) {
-	filter := &Output{
+	filter := &LevelFilter{
 		Levels:   []LogLevel{"TRACE", "DEBUG", "INFO", "WARN", "ERROR"},
 		MinLevel: "WARN",
 		Writer:   ioutil.Discard,
