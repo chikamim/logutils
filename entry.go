@@ -89,6 +89,7 @@ func ltsvToJSON(s string) string {
 		kv := strings.SplitN(pair, ":", 2)
 		if len(kv) < 2 {
 			j.WriteString(escape(kv[0]) + ":\"\"")
+			continue
 		}
 		if isNumber(kv[1]) {
 			j.WriteString(escape(kv[0]) + ":" + kv[1])
