@@ -21,6 +21,8 @@ const (
 	ZapProduction
 )
 
+const debugFlag = 255
+
 // LevelFilter is an io.Writer that can be used with a logger that
 // will filter out log messages that aren't at least a certain level.
 //
@@ -57,7 +59,7 @@ func NewFilter() *LevelFilter {
 
 // NewDevelopment builds a development Logger that writes DebugLevel and above logs to standard error in a human-friendly format.
 func NewDevelopment() *LevelFilter {
-	log.SetFlags(0)
+	log.SetFlags(debugFlag)
 	return &LevelFilter{
 		Levels:   []LogLevel{"DEBUG", "INFO", "WARN", "ERROR"},
 		MinLevel: LogLevel("DEBUG"),
@@ -134,4 +136,8 @@ func (f *LevelFilter) init() {
 		badLevels[level] = struct{}{}
 	}
 	f.badLevels = badLevels
+}
+
+func IsDebug() bool {
+	return log.Flags() == debugFlag
 }
